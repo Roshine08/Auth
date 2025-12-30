@@ -87,7 +87,7 @@ button.primary{background:var(--accent); border-color:transparent; color:#fff}
     <div class="hint" id="remain"></div>
     <div class="barwrap"><div class="bar" id="bar"></div></div>
 
-    <input id="secret" placeholder="Hex secret" autocomplete="off" spellcheck="false" />
+    <input id="secret" placeholder="Private Key" autocomplete="off" spellcheck="false" />
 
     <div class="row">
       <button class="primary" id="copy">Copy</button>
@@ -104,7 +104,7 @@ const $=id=>document.getElementById(id);
 
 function hexToBytes(hex){
   const s=hex.trim().replace(/^0x/i,"").replace(/[^0-9a-f]/ig,"");
-  if(!s) throw Error("Enter secret");
+  if(!s) throw Error("Enter Your Privite Key");
   if(s.length%2) throw Error("Invalid hex");
   const out=new Uint8Array(s.length/2);
   for(let i=0;i<s.length;i+=2) out[i/2]=parseInt(s.slice(i,i+2),16);
