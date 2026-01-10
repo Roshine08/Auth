@@ -3,73 +3,264 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Authenticator</title>
+<title>Battle.net Authenticator</title>
+
+<link rel="icon" href="logo.png" />
 
 <style>
 :root{
-  --bg:#0b0f16; --card:#121a26; --border:#243043;
-  --text:#e8eefc; --muted:#9fb0c8; --accent:#4c8bf5;
+  --bg-dark:#0b0f16;
+  --card-dark:#121a26;
+  --border-dark:#243043;
+  --text-dark:#e8eefc;
+  --muted-dark:#9fb0c8;
+  --accent-dark:#23a8ff;      /* 稍微更偏 Battle.net 的蓝色 */
+
+  --bg-light:#f5f7fb;
+  --card-light:#ffffff;
+  --border-light:#e6eaf2;
+  --text-light:#0b1220;
+  --muted-light:#55657f;
+  --accent-light:#0078ff;
+
+  --bg:var(--bg-dark);
+  --card:var(--card-dark);
+  --border:var(--border-dark);
+  --text:var(--text-dark);
+  --muted:var(--muted-dark);
+  --accent:var(--accent-dark);
 }
-@media (prefers-color-scheme: light){
-  :root{ --bg:#f5f7fb; --card:#ffffff; --border:#e6eaf2; --text:#0b1220; --muted:#55657f; --accent:#2f6fe8; }
+
+html[data-theme="dark"]{
+  --bg:var(--bg-dark);
+  --card:var(--card-dark);
+  --border:var(--border-dark);
+  --text:var(--text-dark);
+  --muted:var(--muted-dark);
+  --accent:var(--accent-dark);
 }
+
+html[data-theme="light"]{
+  --bg:var(--bg-light);
+  --card:var(--card-light);
+  --border:var(--border-light);
+  --text:var(--text-light);
+  --muted:var(--muted-light);
+  --accent:var(--accent-light);
+}
+
 html,body{height:100%}
 body{
-  margin:0; display:flex; align-items:center; justify-content:center;
-  background:var(--bg); color:var(--text);
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--bg);
+  color:var(--text);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
 }
 .wrap{width:min(420px,92vw)}
+
+/* ===== 卡片 + Battle.net 风格蓝色边框 ===== */
 .card{
-  background:var(--card); border:1px solid var(--border);
-  border-radius:22px; padding:18px 16px 16px;
-  box-shadow:0 12px 40px rgba(0,0,0,.25);
+  position:relative;
+  background:var(--card);
+  border-radius:22px;
+  padding:18px 16px 16px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.5),
+    0 18px 45px rgba(0,0,0,.5);
+  overflow:hidden;
 }
-.top{display:flex; align-items:center; gap:10px; margin-bottom:12px}
-.logo{
-  width:36px; height:36px; border-radius:14px;
-  background:radial-gradient(circle at 30% 30%, #7db0ff, var(--accent));
-  box-shadow:0 10px 30px rgba(76,139,245,.35);
+
+/* 外圈蓝色描边 + 轻微渐变发光 */
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:1px;
+  background:linear-gradient(135deg,
+              rgba(0,185,255,.95),
+              rgba(0,110,255,.8),
+              rgba(0,40,120,.9));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+          mask-composite:exclude;
+  pointer-events:none;
+  opacity:.9;
 }
-.title{font-weight:700}
+.card::after{
+  /* 顶部一点蓝色辉光，像 Battle.net client 顶边 */
+  content:"";
+  position:absolute;
+  left:10%;
+  right:10%;
+  top:-40px;
+  height:80px;
+  background:radial-gradient(circle at 50% 100%,
+              rgba(35,168,255,.65),
+              transparent 70%);
+  opacity:.8;
+  pointer-events:none;
+}
+
+.top{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.top-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo-img{
+  width:36px;
+  height:36px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+
+.title{
+  font-weight:700;
+  font-size:16px;
+  white-space:nowrap;
+}
+
+.theme-toggle{
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.08);
+  color:var(--text);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  padding:0;
+}
+html[data-theme="light"] .theme-toggle{
+  background:rgba(0,0,0,.02);
+}
 
 .code{
+  position:relative;
+  z-index:1;
   text-align:center;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
-  font-size:56px; font-weight:900; letter-spacing:4px;
+  font-family:ui-monospace,monospace;
+  font-size:56px; font-weight:900;
+  letter-spacing:4px;
   margin:10px 0 8px;
 }
-.hint{ text-align:center; font-size:12px; color:var(--muted); margin-bottom:12px; }
-
-.barwrap{
-  height:10px; background:rgba(255,255,255,.08);
-  border-radius:999px; overflow:hidden;
+.hint{
+  position:relative;
+  z-index:1;
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:12px;
 }
-.bar{height:10px; width:0%; background:var(--accent); transition:width .15s linear}
+
+/* ===== 进度条外框 ===== */
+.barwrap{
+  position:relative;
+  z-index:1;
+  height:10px;
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  overflow:hidden;
+}
+html[data-theme="light"] .barwrap{
+  background:rgba(0,0,0,.06);
+}
+
+/* ===== 动画进度条：宽度按时间变化，内部做流动渐变动画 ===== */
+.bar{
+  height:10px;
+  width:0%;
+  border-radius:999px;
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,.2),
+      rgba(255,255,255,.8),
+      rgba(255,255,255,.2))
+    ,var(--accent);
+  background-blend-mode:screen;
+  background-size:200% 100%;
+  animation:barStripe 1.4s linear infinite;
+  transition:width .15s linear;
+}
+
+/* 内部流光效果 */
+@keyframes barStripe{
+  0%{background-position:0% 0;}
+  100%{background-position:200% 0;}
+}
 
 input{
-  width:100%; box-sizing:border-box; margin-top:14px;
-  padding:12px; border-radius:14px;
+  position:relative;
+  z-index:1;
+  width:100%;
+  box-sizing:border-box;
+  margin-top:14px;
+  padding:12px;
+  border-radius:14px;
   border:1px solid var(--border);
-  background:transparent; color:var(--text);
+  background:rgba(0,0,0,.1);
+  color:var(--text);
   font-size:14px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-family:ui-monospace,monospace;
   outline:none;
 }
-input::placeholder{color:rgba(159,176,200,.7)}
-
-.row{display:flex; gap:10px; justify-content:center; margin-top:12px}
-button{
-  padding:10px 16px; border-radius:14px;
-  border:1px solid var(--border);
-  background:transparent; color:var(--text);
-  font-size:14px; cursor:pointer;
+html[data-theme="light"] input{
+  background:rgba(255,255,255,.7);
 }
-button.primary{background:var(--accent); border-color:transparent; color:#fff}
+input::placeholder{color:rgba(159,176,200,.7)}
+html[data-theme="light"] input::placeholder{color:rgba(85,101,127,.7)}
+
+.row{
+  position:relative;
+  z-index:1;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:12px;
+}
+button{
+  padding:10px 16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.08);
+  color:var(--text);
+  font-size:14px;
+  cursor:pointer;
+}
+html[data-theme="light"] button{
+  background:rgba(255,255,255,.9);
+}
+button.primary{
+  background:var(--accent);
+  border-color:transparent;
+  color:#fff;
+}
 
 .status{
-  margin-top:10px; text-align:center;
-  font-size:12px; color:var(--muted); min-height:16px
+  position:relative;
+  z-index:1;
+  margin-top:10px;
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  min-height:16px;
 }
 .err{color:#ff6b6b}
 </style>
@@ -79,8 +270,11 @@ button.primary{background:var(--accent); border-color:transparent; color:#fff}
 <div class="wrap">
   <div class="card">
     <div class="top">
-      <div class="logo"></div>
-      <div class="title">Authenticator</div>
+      <div class="top-left">
+        <img src="logo.png" class="logo-img" alt="Battle.net Logo">
+        <div class="title">Battle.net Authenticator</div>
+      </div>
+      <button class="theme-toggle" id="themeToggle">🌙</button>
     </div>
 
     <div class="code" id="code">--------</div>
@@ -100,8 +294,27 @@ button.primary{background:var(--accent); border-color:transparent; color:#fff}
 
 <script>
 const DIGITS=8, PERIOD=30;
+const THEME_KEY="theme-choice";
 const $=id=>document.getElementById(id);
 
+/* ===== 主题切换 ===== */
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme",theme);
+  $("themeToggle").textContent=theme==="dark"?"🌙":"☀️";
+}
+(function(){
+  const saved=localStorage.getItem(THEME_KEY);
+  if(saved) applyTheme(saved);
+  else applyTheme(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
+})();
+$("themeToggle").onclick=()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const next=cur==="dark"?"light":"dark";
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY,next);
+};
+
+/* ===== TOTP 逻辑 ===== */
 function hexToBytes(hex){
   const s=hex.trim().replace(/^0x/i,"").replace(/[^0-9a-f]/ig,"");
   if(!s) throw Error("Enter Your Privite Key");
@@ -140,29 +353,42 @@ async function gen(){
     $("status").classList.add("err");
   }
 }
+
+/* ===== 进度条：按时间改变宽度 ===== */
 function tick(){
-  const s=Math.floor(Date.now()/1000);
-  const rem=PERIOD-(s%PERIOD);
+  const now=Math.floor(Date.now()/1000);
+  const rem=PERIOD-(now%PERIOD);
   $("remain").textContent=`${rem}s`;
-  $("bar").style.width=((PERIOD-rem)/PERIOD*100)+"%";
+  const ratio=(PERIOD-rem)/PERIOD;
+  $("bar").style.width=(ratio*100)+"%";
 }
 
 let last=-1;
-setInterval(()=>{ tick(); const s=Math.floor(Date.now()/1000); if(s!==last){ last=s; gen(); } },150);
+setInterval(()=>{
+  tick();
+  const s=Math.floor(Date.now()/1000);
+  if(s!==last){ last=s; gen(); }
+},150);
 
-$("secret").addEventListener("input",gen);
-$("copy").addEventListener("click",async()=>{
+$("secret").oninput=gen;
+$("copy").onclick=async()=>{
   const v=$("code").textContent;
   if(v.includes("-")) return;
-  try{ await navigator.clipboard.writeText(v); $("status").textContent="Copied"; }
-  catch{ $("status").textContent="Copy blocked"; $("status").classList.add("err"); }
-});
-$("clear").addEventListener("click",()=>{
+  try{
+    await navigator.clipboard.writeText(v);
+    $("status").textContent="Copied";
+    $("status").classList.remove("err");
+  }catch{
+    $("status").textContent="Copy blocked";
+    $("status").classList.add("err");
+  }
+};
+$("clear").onclick=()=>{
   $("secret").value="";
   $("code").textContent="--------";
   $("status").textContent="";
   $("status").classList.remove("err");
-});
+};
 
 tick(); gen();
 </script>
