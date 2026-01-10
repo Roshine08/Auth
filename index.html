@@ -19,7 +19,7 @@
   --muted-dark:#7c8aaa;       /* 次要文字：灰蓝 */
   --accent-dark:#29b6ff;      /* 高亮蓝：战网感 */
 
-  /* 亮色主题：改成“暗灰系”亮色，不晃眼 */
+  /* 亮色主题：暗灰系亮色，不晃眼 */
   --bg-light:#171920;         /* 页面背景：深一点的灰蓝 */
   --card-light:#1f222b;       /* 卡片：比背景稍亮 */
   --border-light:#2c3140;     /* 边框：中灰蓝 */
@@ -126,7 +126,7 @@ html[data-theme="light"] body{
 .top-right{
   display:flex;
   align-items:center;
-  gap:18px;
+  gap:12px;
 }
 
 .logo-img{
@@ -147,65 +147,77 @@ html[data-theme="light"] body{
   white-space:nowrap;
 }
 
-/* 语言切换：更宽、更明显的胶囊按钮 */
-.lang-select{
-  padding:7px 20px;
+/* 顶部控制统一风格：EN / 🌙 / 菜单 */
+.top-control{
+  min-width:52px;
+  height:32px;
+  padding:0 14px;
   border-radius:999px;
-  border:none;
-  background:linear-gradient(
-    135deg,
-    rgba(16,38,78,.98),
-    rgba(7,19,43,.98)
-  );
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.18),
-    0 0 10px rgba(35,168,255,.35);
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.25);
   color:var(--text);
   font-size:13px;
   font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 18px rgba(0,0,0,.45);
+  cursor:pointer;
+  transition:
+    background .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease,
+    opacity .15s ease;
+}
+html[data-theme="light"] .top-control{
+  border-color:rgba(0,0,0,.55);
+  background:rgba(0,0,0,.30);
+  box-shadow:0 8px 18px rgba(0,0,0,.65);
+}
+
+.top-control:hover{
+  background:rgba(0,0,0,.4);
+  transform:translateY(-1px);
+  box-shadow:0 10px 22px rgba(0,0,0,.75);
+}
+
+/* 语言选择：外观跟着 top-control，隐藏原生样式 */
+.lang-select{
   appearance:none;
   -moz-appearance:none;
   -webkit-appearance:none;
+  border:none;
+  background:transparent;
+  padding:0 18px;
+  text-align:center;
 }
-/* 暗色下拉选项背景更明显 */
+
+/* 下拉列表项颜色 */
 .lang-select option{
   background:#050b16;
   color:#e8eefc;
 }
-/* 亮色下拉选项 */
 html[data-theme="light"] .lang-select option{
   background:#1a1d26;
   color:#e4e7f5;
 }
 
-/* 亮色下拉外观：改成暗灰渐变 */
-html[data-theme="light"] .lang-select{
-  background:linear-gradient(
-    135deg,
-    #262a35,
-    #1f222b
-  );
-  color:var(--text);
-  box-shadow:0 0 0 1px rgba(0,0,0,.4);
+/* 主题按钮：只控制图标大小，其余由 top-control 保证 */
+.theme-toggle{
+  border:none;
+  background:transparent;
+  padding:0;
+  min-width:auto;
+  font-size:18px;
 }
 
-/* 主题切换：无边框，只要柔和背景 */
-.theme-toggle{
-  width:34px;height:34px;
-  border-radius:50%;
+/* （预留）菜单按钮：同样风格 */
+.menu-toggle{
   border:none;
-  background:rgba(0,0,0,.16);
-  color:var(--text);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:18px;
-  transition:background .15s ease, box-shadow .15s ease, transform .15s ease;
-}
-html[data-theme="light"] .theme-toggle{
-  background:rgba(0,0,0,.24);
-}
-.theme-toggle:hover{
-  box-shadow:0 0 10px rgba(35,168,255,.8);
-  transform:translateY(-1px);
+  background:transparent;
+  padding:0;
+  min-width:auto;
+  font-size:16px;
 }
 
 /* 验证码更大一些 */
@@ -274,7 +286,7 @@ input{
   font-family:ui-monospace,monospace;
 }
 html[data-theme="light"] input{
-  background:rgba(255,255,255,.04); /* 比卡片稍亮一点 */
+  background:rgba(255,255,255,.04);
 }
 input::placeholder{
   color:rgba(159,176,200,.7);
@@ -373,7 +385,7 @@ button:not(.primary):hover{
         <div class="title" id="titleText">Battle.net Authenticator</div>
       </div>
       <div class="top-right">
-        <select id="langSelect" class="lang-select">
+        <select id="langSelect" class="lang-select top-control">
           <option value="en">EN</option>
           <option value="zh">中文</option>
           <option value="fr">FR</option>
@@ -382,7 +394,12 @@ button:not(.primary):hover{
           <option value="it">IT</option>
           <option value="ar">العربية</option>
         </select>
-        <button class="theme-toggle" id="themeToggle">☀️</button>
+
+        <button class="theme-toggle top-control" id="themeToggle">☀️</button>
+
+        <!-- 预留菜单按钮示例（如果将来要用，解开注释）
+        <button class="menu-toggle top-control" id="menuToggle">☰</button>
+        -->
       </div>
     </div>
 
