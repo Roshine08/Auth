@@ -11,20 +11,23 @@
 
 <style>
 :root{
-  --bg-dark:#0b0f16;
-  --card-dark:#121a26;
-  --border-dark:#243043;
-  --text-dark:#e8eefc;
-  --muted-dark:#9fb0c8;
-  --accent-dark:#23a8ff;
+  /* 深色主题：偏 Warframe / Battle.net 科幻蓝 */
+  --bg-dark:#05060b;          /* 整体背景：接近纯黑 */
+  --card-dark:#0b1018;        /* 卡片背景：深蓝黑 */
+  --border-dark:#202736;      /* 边框：冷灰蓝 */
+  --text-dark:#e6f0ff;        /* 主文字：偏冷的白 */
+  --muted-dark:#7c8aaa;       /* 次要文字：灰蓝 */
+  --accent-dark:#29b6ff;      /* 高亮蓝：战网感 */
 
-  --bg-light:#f5f7fb;
-  --card-light:#ffffff;
-  --border-light:#e6eaf2;
-  --text-light:#0b1220;
-  --muted-light:#55657f;
-  --accent-light:#0078ff;
+  /* 浅色主题：Blizzard 风格的灰蓝 + 白卡片 */
+  --bg-light:#e5e9f3;         /* 页面背景：浅灰蓝 */
+  --card-light:#ffffff;       /* 卡片：纯白 */
+  --border-light:#cfd7e6;     /* 边框：淡灰蓝 */
+  --text-light:#0b1220;       /* 主文字：深蓝黑 */
+  --muted-light:#5c6a85;      /* 次要文字：冷灰 */
+  --accent-light:#007dfc;     /* 高亮：战网蓝 */
 
+  /* 当前实际使用（由 data-theme 决定） */
   --bg:var(--bg-dark);
   --card:var(--card-dark);
   --border:var(--border-dark);
@@ -62,13 +65,16 @@ body{
   font-family:"Titillium Web",system-ui,-apple-system,Segoe UI,Roboto,Arial;
 }
 
-/* 暗色 Battle.net 背景 */
+/* 暗色：黑 / 深蓝灰渐变 */
 html[data-theme="dark"] body{
   background:
-    radial-gradient(circle at 50% 0,
-      rgba(22,58,107,.9) 0,
-      rgba(11,15,22,.3) 55%,
-      rgba(5,7,11,1) 100%);
+    radial-gradient(circle at 50% -10%, #161b27 0%, #05060b 65%, #000000 100%);
+}
+
+/* 亮色：灰蓝背景，中心稍亮 */
+html[data-theme="light"] body{
+  background:
+    radial-gradient(circle at 50% -10%, #ffffff 0%, #e5e9f3 70%, #d4d8e2 100%);
 }
 
 /* 卡片整体更大 */
@@ -400,7 +406,8 @@ button:not(.primary):hover{
 <script>
 const DIGITS = 8;
 const PERIOD = 30;
-const THEME_KEY = "theme-choice";
+const THEME_KEY = "theme-choice";       // 实际 data-theme
+const THEME_MODE_KEY = "theme-mode";    // system / light / dark
 const LANG_KEY  = "locale-choice";
 const $ = id => document.getElementById(id);
 
@@ -560,22 +567,74 @@ function applyTheme(theme){
   document.documentElement.setAttribute("data-theme", theme);
   const btn = $("themeToggle");
   if (!btn) return;
+  // 当前主题为 dark 时，按钮显示“切成亮”的图标
   btn.textContent = theme === "dark" ? "☀️" : "🌙";
 }
 
+// 根据系统偏好返回 "light" 或 "dark"
+function getSystemTheme(){
+  const prefersDark = window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return prefersDark ? "dark" : "light";
+}
+
+// 初始化主题 & 监听系统变化（支持 system / light / dark 三种模式）
 (function initTheme(){
-  const saved = localStorage.getItem(THEME_KEY);
-  const prefersLight = window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: light)").matches;
-  const initial = saved || (prefersLight ? "light" : "dark");
-  applyTheme(initial);
+  let mode  = localStorage.getItem(THEME_MODE_KEY);  // system / light / dark
+  let theme = localStorage.getItem(THEME_KEY);       // 实际 data-theme
+
+  if (!mode){
+    // 第一次访问：默认跟随系统
+    mode = "system";
+    theme = getSystemTheme();
+    localStorage.setItem(THEME_MODE_KEY, mode);
+    localStorage.setItem(THEME_KEY, theme);
+  }else{
+    // 已经存过：如果是 system 就再取一下当前系统主题
+    if (mode === "system"){
+      theme = getSystemTheme();
+      localStorage.setItem(THEME_KEY, theme);
+    }else if (!theme){
+      // 容错：mode 有但 theme 没有
+      theme = mode === "dark" ? "dark" : "light";
+      localStorage.setItem(THEME_KEY, theme);
+    }
+  }
+
+  applyTheme(theme);
+
+  // 监听系统主题变化：只有在 mode === system 时才自动切
+  if (window.matchMedia){
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", e => {
+      const currentMode = localStorage.getItem(THEME_MODE_KEY) || "system";
+      if (currentMode !== "system") return;
+      const nextTheme = e.matches ? "dark" : "light";
+      localStorage.setItem(THEME_KEY, nextTheme);
+      applyTheme(nextTheme);
+    });
+  }
 })();
 
+// 三态切换：system -> dark -> light -> system
 $("themeToggle").addEventListener("click", () => {
-  const cur  = document.documentElement.getAttribute("data-theme") || "dark";
-  const next = cur === "dark" ? "light" : "dark";
-  applyTheme(next);
-  localStorage.setItem(THEME_KEY, next);
+  let mode  = localStorage.getItem(THEME_MODE_KEY) || "system";
+  let theme = localStorage.getItem(THEME_KEY) || getSystemTheme();
+
+  if (mode === "system"){
+    mode  = "dark";
+    theme = "dark";
+  }else if (mode === "dark"){
+    mode  = "light";
+    theme = "light";
+  }else{ // mode === "light"
+    mode  = "system";
+    theme = getSystemTheme();
+  }
+
+  localStorage.setItem(THEME_MODE_KEY, mode);
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(theme);
 });
 
 /* TOTP 逻辑 */
